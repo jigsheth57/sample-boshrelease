@@ -1,0 +1,13 @@
+---
+name: sample
+templates:
+  ctl.erb: bin/ctl
+
+packages:
+- openjdk
+- sample
+
+properties:
+  sample.listen_port:
+    description: "Listen Port of the Sample instance"
+    default: 8080

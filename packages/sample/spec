@@ -1,0 +1,7 @@
+---
+name: sample
+
+dependencies: []
+
+files:
+- fe-time-tracking-1.0.0.jar # From https://s3.amazonaws.com/pcf-softwares-57/fe-time-tracking-1.0.0.jar

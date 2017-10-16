@@ -1,0 +1,8 @@
+---
+name: openjdk
+
+dependencies: []
+
+files:
+- openjdk-1.8.0_144.tar.gz # From https://s3.amazonaws.com/pcf-softwares-57/openjdk-1.8.0_144.tar.gz
+

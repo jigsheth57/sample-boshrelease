@@ -1,0 +1,19 @@
+#!/bin/bash
+# abort script on any command that exit with a non zero value
+set -e -x
+
+archive=`echo openjdk-*tar.gz`
+
+if [[ -f $archive ]] ; then
+  echo "Archive found"
+else
+  echo "Archive not found"
+  exit 1
+fi
+
+cp -a $archive ${BOSH_INSTALL_TARGET}
+export OPENJDK_HOME=/var/vcap/packages/openjdk
+
+pushd ${OPENJDK_HOME}
+archive=`ls open*gz`
+tar zxvf $archive
