@@ -1,0 +1,165 @@
+bosh2 init-release --dir sample-boshrelease
+cd sample-boshrelease/
+bosh2 generate-job sample
+cd jobs/sample/templates/
+vi ctl.erb
+
+#!/bin/bash
+set +e
+set -xv
+
+RUN_DIR=/var/vcap/sys/run/sample
+LOG_DIR=/var/vcap/sys/log/sample
+PIDFILE=${RUN_DIR}/pid
+
+export DEBUG_LOG=$LOG_DIR/sample.log
+
+touch $DEBUG_LOG
+chmod -R 755 /var/vcap/sys
+chmod 777 $DEBUG_LOG
+
+function log_debug() {
+  echo `date` $1 >> $DEBUG_LOG
+}
+
+log_debug "Kicking off ctl script as `whoami` with $1"
+
+case $1 in
+
+  start)
+    mkdir -p $RUN_DIR $LOG_DIR
+    chown -R vcap:vcap $RUN_DIR $LOG_DIR
+
+    echo $$ > $PIDFILE
+
+    export OPENJDK_HOME=/var/vcap/packages/openjdk/
+    export SAMPLE_PACKAGE=/var/vcap/packages/sample/
+
+    pushd ${OPENJDK_HOME}
+    if [[ -d bin && `bin/java -Xmx64M -version 2>&1` =~ "OpenJDK 64-Bit Server" && $? == 0 ]]; then
+      export JAVA_BINARY=${OPENJDK_HOME}bin/java
+      cd ..
+    else
+      log_debug "JVM is not properly packaged"
+      exit 1
+    fi
+    log_debug "Located Java Binary at: ${JAVA_BINARY}"
+
+    exec $JAVA_BINARY -jar $SAMPLE_PACKAGE/fe-time-tracking-*.jar -Dserver.port=<%= properties.sample.listen_port %> \
+      >>  $LOG_DIR/sample.stdout.log \
+      2>> $LOG_DIR/sample.stderr.log
+
+    ;;
+
+  stop)
+    kill -9 `cat $PIDFILE`
+    rm -f $PIDFILE
+
+    ;;
+
+  *)
+    echo "Usage: ctl {start|stop}" ;;
+
+esac
+
+
+vi ../monit
+
+check process sample
+  with pidfile /var/vcap/sys/run/sample/pid
+  start program "/var/vcap/jobs/sample/bin/ctl start"
+  stop program "/var/vcap/jobs/sample/bin/ctl stop"
+  group vcap
+
+vi ../spec
+
+---
+name: sample
+templates:
+  ctl.erb: bin/ctl
+
+packages:
+- openjdk
+- sample
+properties:
+  sample.listen_port:
+    description: "Listen Port of the Sample instance"
+    default: 8080
+
+cd ../../..
+bosh2 generate-package openjdk
+vi packages/openjdk/spec
+
+---
+name: openjdk
+
+dependencies: []
+
+files:
+- openjdk-1.8.0_144.tar.gz # From https://s3.amazonaws.com/pcf-softwares-57/openjdk-1.8.0_144.tar.gz
+
+vi packages/openjdk/packaging
+
+#!/bin/bash
+
+# abort script on any command that exit with a non zero value
+set -e -x
+
+archive=`echo openjdk-*tar.gz`
+
+if [[ -f $archive ]] ; then
+  echo "Archive found"
+else
+  echo "Archive not found"
+  exit 1
+fi
+
+cp -a $archive ${BOSH_INSTALL_TARGET}
+export OPENJDK_HOME=/var/vcap/packages/openjdk
+
+pushd ${OPENJDK_HOME}
+archive=`ls open*gz`
+tar zxvf $archive
+
+bosh2 generate-package sample
+vi packages/sample/spec
+
+---
+name: sample
+
+dependencies: []
+
+files:
+- fe-time-tracking-1.0.0.jar # From https://s3.amazonaws.com/pcf-softwares-57/fe-time-tracking-1.0.0.jar
+
+vi packages/sample/packaging
+
+# abort script on any command that exit with a non zero value
+set -e -x
+
+archive=`echo sample/fe-time-tracking-*jar`
+
+if [[ -f $archive ]] ; then
+  echo "Archive found"
+else
+  echo "Archive not found"
+  exit 1
+fi
+
+cp -r $archive ${BOSH_INSTALL_TARGET}
+
+vi config/final.yml
+
+---
+blobstore:
+  provider: local
+  options:
+    blobstore_path: /tmp/sample-release-blobs
+name: sample-release
+
+bosh2 add-blob ~/Downloads/openjdk-1.8.0_144.tar.gz openjdk-1.8.0_144.tar.gz
+bosh2 add-blob ~/Downloads/fe-time-tracking-1.0.0.jar fe-time-tracking-1.0.0.jar
+
+bosh2 upload-blobs
+
+bosh2 create-release --final --version=1.1.0 --tarball=~/Downloads/sample-boshrelease-1.1.0.tgz

@@ -1,0 +1,37 @@
+---
+name: sample
+
+# replace with `bosh status --uuid`
+director_uuid: 5a36d97a-07d4-4260-83cf-61c923efdeca
+
+releases:
+- name: sample-release
+  version: latest
+
+stemcells:
+  - alias: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+    os: ubuntu-trusty
+    version: latest
+
+instance_groups:
+- name: sample-app
+  instances: 1
+  # replace with a VM type from your BOSH Director's cloud config
+  vm_type: t2.medium
+  #vm_extensions: [concourse-web-backend-pool]
+  stemcell: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+  azs:
+  - z1
+  networks:
+  - name: public
+  jobs:
+  - name: sample
+    release: sample-release
+    properties: {}
+
+update:
+  canaries: 1
+  max_in_flight: 1
+  serial: false
+  canary_watch_time: 1000-60000
+  update_watch_time: 1000-60000
