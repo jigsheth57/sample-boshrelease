@@ -27,7 +27,7 @@ case $1 in
     echo $$ > $PIDFILE
 
     export OPENJDK_HOME=/var/vcap/packages/openjdk/
-    export SAMPLE_PACKAGE=/var/vcap/packages/sample/
+    export SAMPLE_PACKAGE=/var/vcap/packages/sample
 
     pushd ${OPENJDK_HOME}
     if [[ -d bin && `bin/java -Xmx64M -version 2>&1` =~ "OpenJDK 64-Bit Server" && $? == 0 ]]; then
@@ -39,7 +39,7 @@ case $1 in
     fi
     log_debug "Located Java Binary at: ${JAVA_BINARY}"
 
-    exec $JAVA_BINARY -jar $SAMPLE_PACKAGE/fe-time-tracking-*.jar -Dserver.port=<%= p('listen_port') %> \
+    exec $JAVA_BINARY -jar -Dserver.port=<%= p('listen_port') %> $SAMPLE_PACKAGE/fe-time-tracking-*.jar \
       >>  $LOG_DIR/sample.stdout.log \
       2>> $LOG_DIR/sample.stderr.log
 

@@ -1,8 +1,10 @@
+deployment-name: sample
 bosh-uuid: ac3304f5-908a-446e-8b88-5a81ed349298
-release-name: sample-boshrelease
 stemcell-alias: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
-vm-type: t2-micro
+vm-type: t2.medium
 az-name: us-east-1c
 network-name: infra
+release-name: sample-boshrelease
 job-name: sample
 listen-port: 8080
+release-version: 1.0.3
