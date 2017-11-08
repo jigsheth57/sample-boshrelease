@@ -101,7 +101,6 @@ files:
 vi packages/openjdk/packaging
 
 #!/bin/bash
-
 # abort script on any command that exit with a non zero value
 set -e -x
 
@@ -134,6 +133,7 @@ files:
 
 vi packages/sample/packaging
 
+#!/bin/bash
 # abort script on any command that exit with a non zero value
 set -e -x
 
