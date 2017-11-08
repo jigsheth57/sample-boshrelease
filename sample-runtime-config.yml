@@ -1,5 +1,8 @@
-addons:
+releases:
 - name: ((release-name))
+  version: ((release-version))
+addons:
+- name: ((release-name))-demo
   jobs:
   - name: ((job-name))
     release: ((release-name))
