@@ -39,7 +39,7 @@ case $1 in
     fi
     log_debug "Located Java Binary at: ${JAVA_BINARY}"
 
-    exec $JAVA_BINARY -jar $SAMPLE_PACKAGE/fe-time-tracking-*.jar -Dserver.port=<%= properties.sample.listen_port %> \
+    exec $JAVA_BINARY -jar $SAMPLE_PACKAGE/fe-time-tracking-*.jar -Dserver.port=<%= p('listen_port') %> \
       >>  $LOG_DIR/sample.stdout.log \
       2>> $LOG_DIR/sample.stderr.log
 
