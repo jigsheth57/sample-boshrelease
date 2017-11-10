@@ -8,3 +8,5 @@ release-name: sample-boshrelease
 job-name: sample
 listen-port: 8080
 release-version: 1.0.3
+cf_deployment_name: cf-827383743403 # ERT/CF deployment name $bosh2 -e local deps
+app_fqdn: timetracking.sys.cfapps.io  # system domain register with GoRouter

@@ -1,0 +1,51 @@
+---
+name: ((deployment-name))
+
+# replace with `bosh status --uuid`
+director_uuid: ((bosh-uuid))
+
+releases:
+- name: ((release-name))
+  version: latest
+- name: routing
+  version: latest
+
+stemcells:
+  - alias: ((stemcell-alias))
+    os: ubuntu-trusty
+    version: latest
+
+instance_groups:
+- name: ((release-name))-app
+  instances: 1
+  # replace with a VM type from your BOSH Director's cloud config
+  vm_type: ((vm-type))
+  #vm_extensions: [concourse-web-backend-pool]
+  stemcell: ((stemcell-alias))
+  azs:
+  - ((az-name))
+  networks:
+  - name: ((network-name))
+  jobs:
+  - name: ((job-name))
+    release: ((release-name))
+    properties:
+      listen_port: ((listen-port))
+  - name: route_registrar
+    release: routing
+    consumes: |
+      nats: {from: nats, deployment: (( cf_deployment_name ))}
+    properties:
+      routes:
+      - name: ((release-name))-app
+        port: ((listen-port))
+        registration_interval: 20s
+        uris:
+        - ((app_fqdn))
+
+update:
+  canaries: 1
+  max_in_flight: 1
+  serial: false
+  canary_watch_time: 1000-60000
+  update_watch_time: 1000-60000
