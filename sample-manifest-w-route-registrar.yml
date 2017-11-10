@@ -33,15 +33,16 @@ instance_groups:
       listen_port: ((listen-port))
   - name: route_registrar
     release: routing
-    consumes: |
-      nats: {from: nats, deployment: (( cf_deployment_name ))}
+    consumes:
+      nats: {from: nats, deployment: ((cf-deployment-name))}
     properties:
-      routes:
-      - name: ((release-name))-app
-        port: ((listen-port))
-        registration_interval: 20s
-        uris:
-        - ((app_fqdn))
+      route_registrar:
+        routes:
+        - name: ((release-name))-app
+          port: ((listen-port))
+          registration_interval: 20s
+          uris:
+          - ((app-fqdn))
 
 update:
   canaries: 1
