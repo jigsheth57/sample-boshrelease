@@ -1,6 +1,6 @@
-bosh2 init-release --dir sample-boshrelease
+bosh init-release --dir sample-boshrelease --git
 cd sample-boshrelease/
-bosh2 generate-job sample
+bosh generate-job sample
 cd jobs/sample/templates/
 vi ctl.erb
 
@@ -120,7 +120,7 @@ pushd ${OPENJDK_HOME}
 archive=`ls open*gz`
 tar zxvf $archive
 
-bosh2 generate-package sample
+bosh generate-package sample
 vi packages/sample/spec
 
 ---
@@ -157,9 +157,9 @@ blobstore:
     blobstore_path: /tmp/sample-release-blobs
 name: sample-release
 
-bosh2 add-blob ~/Downloads/openjdk-1.8.0_144.tar.gz openjdk-1.8.0_144.tar.gz
-bosh2 add-blob ~/Downloads/fe-time-tracking-1.0.0.jar fe-time-tracking-1.0.0.jar
+bosh add-blob ~/Downloads/openjdk-1.8.0_144.tar.gz openjdk-1.8.0_144.tar.gz
+bosh add-blob ~/Downloads/fe-time-tracking-1.0.0.jar fe-time-tracking-1.0.0.jar
 
-bosh2 upload-blobs
+bosh upload-blobs
 
-bosh2 create-release --final --version=1.1.0 --tarball=~/Downloads/sample-boshrelease-1.1.0.tgz
+bosh create-release --final --version=1.1.0 --tarball=~/Downloads/sample-boshrelease-1.1.0.tgz
